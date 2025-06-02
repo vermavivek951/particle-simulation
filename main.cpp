@@ -7,6 +7,7 @@ and may not be redistributed without written permission.*/
 #include <vector>
 #include <iostream>
 #include <random>
+#include <algorithm>
 
 
 #include "Particle.cpp"
@@ -32,17 +33,21 @@ int main(int argc, char* argv[]) {
 	}
 
 	SDL_Renderer* renderer = SDL_CreateRenderer(window , -1 , SDL_RENDERER_ACCELERATED);
+	SDL_SetRenderDrawBlendMode(renderer,SDL_BLENDMODE_BLEND);
 
 	std::vector<Particle> particles;
+
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> dist(-50.0f , 50.0f);
+	std::uniform_real_distribution<float> vel_dist(-100.0f , 100.0f);
+	std::uniform_real_distribution<float> wind_dist(-50.0f , 50.0f);
+	std::uniform_real_distribution<float> color_dist(0.0f , 255.0f); //color from 0 to 255;
 
 
-	//spawn 100 particles at center
-	for(int i=0; i < 100 ; i++) {
-		particles.emplace_back(SCREEN_WIDTH / 2.0f ,SCREEN_HEIGHT / 2.0f , dist(gen) , dist(gen));
-	}
+	// //spawn 100 particles at center
+	// for(int i=0; i < 100 ; i++) {
+	// 	particles.emplace_back(SCREEN_WIDTH / 2.0f ,SCREEN_HEIGHT / 2.0f , dist(gen) , dist(gen));
+	// }
 
 	bool running = true;
 	SDL_Event event;
@@ -59,23 +64,55 @@ int main(int argc, char* argv[]) {
 		while(SDL_PollEvent(&event)) {
 			if(event.type == SDL_QUIT)
 				running = false;
+
+
+			if(event.type == SDL_MOUSEBUTTONDOWN) {
+				int mouseX , mouseY;
+				SDL_GetMouseState(&mouseX , &mouseY);
+
+				//spawn 10 particles at mouse position with random velocity
+				for(int i=0;i<10;i++) {
+					particles.emplace_back(
+						(float)mouseX,
+						(float)mouseY,
+						vel_dist(gen),
+						vel_dist(gen)
+					);
+				}
+			}
 		}
 
 		//update particles;
 		for(auto &p : particles) {
 			p.applyForce(0, 98.0f); //gravity (in px/s^2);
+
+			//wind - random horizontal acceleration every frame
+			float wind = wind_dist(gen);
+			p.applyForce(wind , 0);
+
 			p.update(static_cast<float>(deltaTime));
+			p.handleCollision(SCREEN_WIDTH , SCREEN_HEIGHT);
 		}
+
+		particles.erase(
+			std::remove_if(particles.begin() , particles.end() ,
+					       [](const Particle& p) {return p.isDead(); }),
+			particles.end()
+		);
 
 		//Clear screen
 		SDL_SetRenderDrawColor(renderer , 0 , 0 , 0 , 255); //black
 		SDL_RenderClear(renderer);
 
 		//Draw particles
-		SDL_SetRenderDrawColor(renderer , 255,255,255,255); //white
-
 		for(const auto& p : particles) {
-			SDL_Rect rect = {(int)p.x , (int)p.y , 2, 2 };
+			Uint8 r = static_cast<Uint8>(color_dist(gen));
+			Uint8 g = static_cast<Uint8>(color_dist(gen));
+			Uint8 b = static_cast<Uint8>(color_dist(gen));
+			Uint8 alpha = static_cast<Uint8>(color_dist(gen));
+
+			SDL_SetRenderDrawColor(renderer , r ,g ,b ,alpha);
+			SDL_Rect rect = {static_cast<int>(p.x) , static_cast<int>(p.y), 7, 7 };
 			SDL_RenderFillRect(renderer , &rect);
 		}
 
