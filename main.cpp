@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
 			Uint8 alpha = static_cast<Uint8>(color_dist(gen));
 
 			SDL_SetRenderDrawColor(renderer , r ,g ,b ,alpha);
-			SDL_Rect rect = {static_cast<int>(p.x) , static_cast<int>(p.y), 7, 7 };
+			SDL_Rect rect = {static_cast<int>(p.x) , static_cast<int>(p.y), 7, 7};
 			SDL_RenderFillRect(renderer , &rect);
 		}
 
