@@ -1,17 +1,19 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include "Color.h"
+
 class Particle  {
     public:
         float x , y;
         float vx , vy;
         float ax , ay;
-        Uint8 r,g,b,alpha;
         float lifespan;
         float age = 0.0f;
 
-        Particle(float x_init , float y_init , float vx_init = 0.0f , float vy_init = 0.0f , Uint8 red = 255 , Uint8 blue = 255 , Uint8 green = 255 , Uint8 alpha_init = 255)
-                : x(x_init) , y(y_init) , vx(vx_init) , vy(vy_init) , ax(0) , ay(0),
-                r(red) , g(blue) , b(green) , alpha(alpha_init), lifespan(5.0f) {} //5 seconds
+        Color color;
+
+        Particle(float x_init , float y_init , Color color_init, float vx_init = 0.0f , float vy_init = 0.0f )
+                : x(x_init) , y(y_init) , color(color_init) , vx(vx_init) , vy(vy_init) , ax(0) , ay(0), lifespan(5.0f){} //5 seconds
 
         void update(float dt) {
             vx = vx + ax * dt;
@@ -21,7 +23,7 @@ class Particle  {
             y = y + vy * dt;
             
             age = age + dt;
-            alpha = static_cast<Uint8>(255 * (1.0f - age / lifespan));
+            // alpha = static_cast<Uint8>(255 * (1.0f - age / lifespan)); //TODO
 
             //reset acceleration after update(forces need to be applied each frame)
             ax = 0;

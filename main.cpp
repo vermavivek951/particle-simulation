@@ -2,6 +2,7 @@
 and may not be redistributed without written permission.*/
 
 //Using SDL and standard IO
+#pragma once
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <vector>
@@ -11,6 +12,7 @@ and may not be redistributed without written permission.*/
 
 
 #include "Particle.cpp"
+#include "Color.h"
 
 int main(int argc, char* argv[]) {
 	const int SCREEN_WIDTH = 800;
@@ -71,10 +73,12 @@ int main(int argc, char* argv[]) {
 				SDL_GetMouseState(&mouseX , &mouseY);
 
 				//spawn 10 particles at mouse position with random velocity
+				Color color = Color(color_dist(gen) , color_dist(gen),color_dist(gen) , color_dist(gen));
 				for(int i=0;i<10;i++) {
 					particles.emplace_back(
 						(float)mouseX,
 						(float)mouseY,
+						color,
 						vel_dist(gen),
 						vel_dist(gen)
 					);
@@ -106,12 +110,7 @@ int main(int argc, char* argv[]) {
 
 		//Draw particles
 		for(const auto& p : particles) {
-			Uint8 r = static_cast<Uint8>(color_dist(gen));
-			Uint8 g = static_cast<Uint8>(color_dist(gen));
-			Uint8 b = static_cast<Uint8>(color_dist(gen));
-			Uint8 alpha = static_cast<Uint8>(color_dist(gen));
-
-			SDL_SetRenderDrawColor(renderer , r ,g ,b ,alpha);
+			SDL_SetRenderDrawColor(renderer , p.color.red ,p.color.green , p.color.blue ,p.color.alpha);
 			SDL_Rect rect = {static_cast<int>(p.x) , static_cast<int>(p.y), 7, 7};
 			SDL_RenderFillRect(renderer , &rect);
 		}
