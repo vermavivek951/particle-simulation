@@ -23,7 +23,7 @@ class Particle  {
             y = y + vy * dt;
             
             age = age + dt;
-            // alpha = static_cast<Uint8>(255 * (1.0f - age / lifespan)); //TODO
+            color.alpha = static_cast<Uint8>(255 * (1.0f - age / lifespan)); //TODO
 
             //reset acceleration after update(forces need to be applied each frame)
             ax = 0;
